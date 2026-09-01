@@ -32,14 +32,38 @@ public class GamesController : ControllerBase
         return Ok(game);
     }
 
-    [HttpPost("{gameId:guid}/moves")]
+    [HttpPost("{gameId}/moves")]
     public ActionResult<GameResponse> MakeMove(
         Guid gameId,
-        [FromBody] MakeMoveRequest request)
+        MakeMoveRequest request)
     {
-        var game = _gameService.MakeMove(gameId, request);
+        try
+        {
+            var game = _gameService.MakeMove(gameId, request);
 
-        return Ok(game);
+            return Ok(game);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
     }
 
     [HttpPost("{gameId:guid}/undo")]

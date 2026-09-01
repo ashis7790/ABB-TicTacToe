@@ -446,9 +446,10 @@ public class GameService : IGameService
         };
     }
 
+    // 
     public ScoreboardResponse ResetScoreboard()
     {
-        _scoreboard.XWins = 0;
+        _scoreboard.XWins = 0 ; 
         _scoreboard.OWins = 0;
         _scoreboard.Draws = 0;
 
