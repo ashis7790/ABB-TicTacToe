@@ -1,0 +1,165 @@
+.game-container {
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background: #f5f6f8;
+  }
+  
+  h1 {
+    margin-bottom: 30px;
+    font-size: 40px;
+  }
+  
+  .game-info {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+  }
+  
+  .info-box {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .info-box span {
+    display: block;
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .info-box strong {
+    font-size: 20px;
+  }
+
+  .board {
+    width: 360px;
+    height: 360px;
+    margin: 30px auto;
+  
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .cell {
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+    background: white;
+  
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+    font-size: 55px;
+    font-weight: bold;
+  
+    cursor: pointer;
+  }
+  .cell:hover {
+    background: #eeeeee;
+  }
+
+
+  .result-message {
+    margin: 20px auto;
+    padding: 15px 25px;
+    max-width: 360px;
+  
+    background: white;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+  
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .winning-cell {
+    border: 2px solid #22c55e;
+    background: #dcfce7;
+  }
+
+  .actions {
+    margin: 25px auto;
+    text-align: center;
+  }
+  
+  .new-game-button {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .new-game-button:hover {
+    background: #1d4ed8;
+  }
+
+  .undo-button {
+    padding: 12px 28px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    background: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .undo-button:hover {
+    background: #eeeeee;
+  }
+
+  .scoreboard {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 20px;
+  
+    background: white;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+  }
+  
+  .scoreboard h2 {
+    margin: 0 0 20px;
+    font-size: 24px;
+  }
+  
+  .score-items {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+  }
+  
+  .score-item {
+    flex: 1;
+  }
+  
+  .score-item span {
+    display: block;
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .score-item strong {
+    font-size: 24px;
+  }
+
+  .error-message {
+    max-width: 400px;
+    margin: 15px auto;
+    padding: 12px 18px;
+  
+    background: #fff1f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+  
+    color: #b91c1c;
+    font-size: 15px;
+  }
