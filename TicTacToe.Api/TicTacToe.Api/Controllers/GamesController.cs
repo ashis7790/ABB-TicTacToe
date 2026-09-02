@@ -15,6 +15,7 @@ public class GamesController : ControllerBase
         _gameService = gameService;
     }
 
+    // CREATE GAME
     [HttpPost]
     public ActionResult<GameResponse> CreateGame(
         [FromBody] CreateGameRequest request)
@@ -24,6 +25,7 @@ public class GamesController : ControllerBase
         return Ok(game);
     }
 
+    // GET GAME
     [HttpGet("{gameId:guid}")]
     public ActionResult<GameResponse> GetGame(Guid gameId)
     {
@@ -32,6 +34,7 @@ public class GamesController : ControllerBase
         return Ok(game);
     }
 
+    // MAKE MOVE
     [HttpPost("{gameId}/moves")]
     public ActionResult<GameResponse> MakeMove(
         Guid gameId,
@@ -66,7 +69,8 @@ public class GamesController : ControllerBase
         }
     }
 
-    [HttpPost("{gameId:guid}/undo")]
+    // UNDO
+    [HttpPost("{gameId}/undo")]
     public ActionResult<GameResponse> UndoLastMove(Guid gameId)
     {
         var game = _gameService.UndoLastMove(gameId);
@@ -74,11 +78,30 @@ public class GamesController : ControllerBase
         return Ok(game);
     }
 
-    [HttpPost("{gameId:guid}/reset")]
+    // RESET GAME
+    [HttpPost("{gameId}/reset")]
     public ActionResult<GameResponse> ResetGame(Guid gameId)
     {
         var game = _gameService.ResetGame(gameId);
 
         return Ok(game);
+    }
+
+    // GET SCOREBOARD
+    [HttpGet("scoreboard")]
+    public ActionResult<ScoreboardResponse> GetScoreboard()
+    {
+        var scoreboard = _gameService.GetScoreboard();
+
+        return Ok(scoreboard);
+    }
+
+    // RESET SCOREBOARD
+    [HttpPost("scoreboard/reset")]
+    public ActionResult<ScoreboardResponse> ResetScoreboard()
+    {
+        var scoreboard = _gameService.ResetScoreboard();
+
+        return Ok(scoreboard);
     }
 }

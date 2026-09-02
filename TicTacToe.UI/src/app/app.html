@@ -7,12 +7,30 @@
 
     <div class="info-box">
       <span>Game Mode</span>
-      <strong>Player vs Player</strong>
+
+      <select
+        [(ngModel)]="selectedMode"
+        [disabled]="moveInProgress"
+        (change)="changeGameMode()">
+
+        <option [ngValue]="0">
+          Player vs Player
+        </option>
+
+        <option [ngValue]="1">
+          Player vs Computer
+        </option>
+
+      </select>
     </div>
+
 
     <div class="info-box">
       <span>Current Player</span>
-      <strong>{{ currentPlayer }}</strong>
+
+      <strong>
+        {{ currentPlayer }}
+      </strong>
     </div>
 
   </div>
@@ -20,33 +38,41 @@
 
   <!-- Error Message -->
   @if (errorMessage) {
+
     <div class="error-message">
       {{ errorMessage }}
     </div>
+
   }
 
 
   <!-- Move In Progress -->
   @if (moveInProgress) {
+
     <div class="move-message">
       Making move...
     </div>
+
   }
 
 
   <!-- Winner Message -->
   @if (status === 'Won') {
+
     <div class="result-message">
       🎉 Player {{ winner }} Wins!
     </div>
+
   }
 
 
   <!-- Draw Message -->
   @if (status === 'Draw') {
+
     <div class="result-message">
       🤝 Game Draw!
     </div>
+
   }
 
 
@@ -59,8 +85,16 @@
         type="button"
         class="cell"
         [class.winning-cell]="winningCells.includes($index)"
+        [disabled]="
+          moveInProgress ||
+          status !== 'In Progress' ||
+          cell !== null ||
+          (selectedMode === 1 && currentPlayer !== 'X')
+        "
         (click)="makeMove($index)">
+
         {{ cell }}
+
       </button>
 
     }
@@ -74,15 +108,26 @@
     <button
       type="button"
       class="undo-button"
+      [disabled]="
+        moves.length === 0 ||
+        moveInProgress ||
+        status !== 'In Progress'
+      "
       (click)="undoMove()">
+
       Undo Last Move
+
     </button>
+
 
     <button
       type="button"
       class="new-game-button"
+      [disabled]="moveInProgress"
       (click)="resetGame()">
+
       Reset Game
+
     </button>
 
   </div>
@@ -101,6 +146,7 @@
 
     }
 
+
     @if (moves.length > 0) {
 
       <div class="history-header">
@@ -108,6 +154,7 @@
         <span>Player</span>
         <span>Position</span>
       </div>
+
 
       @for (move of moves; track move.moveNumber) {
 
@@ -143,21 +190,50 @@
     <div class="score-items">
 
       <div class="score-item">
+
         <span>X Wins</span>
-        <strong>{{ xWins }}</strong>
+
+        <strong>
+          {{ xWins }}
+        </strong>
+
       </div>
 
+
       <div class="score-item">
+
         <span>O Wins</span>
-        <strong>{{ oWins }}</strong>
+
+        <strong>
+          {{ oWins }}
+        </strong>
+
       </div>
 
+
       <div class="score-item">
+
         <span>Draws</span>
-        <strong>{{ draws }}</strong>
+
+        <strong>
+          {{ draws }}
+        </strong>
+
       </div>
 
     </div>
+
+
+    <!-- Reset Scoreboard -->
+    <button
+      type="button"
+      class="reset-scoreboard-button"
+      [disabled]="moveInProgress"
+      (click)="resetScoreboard()">
+
+      Reset Scoreboard
+
+    </button>
 
   </div>
 

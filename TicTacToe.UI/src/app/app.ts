@@ -5,20 +5,28 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 
-import { GameService } from './services/game';
-import { Move, GameResponse } from './models/game-response';
+import { FormsModule } from '@angular/forms';
+
+import {
+  GameService,
+  ScoreboardResponse
+} from './services/game';
+
+import {
+  Move,
+  GameResponse
+} from './models/game-response';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  imports: [FormsModule]
 })
 export class App implements OnInit {
 
   private gameService = inject(GameService);
-
   private cdr = inject(ChangeDetectorRef);
-
 
   board: (string | null)[] = Array(9).fill(null);
 
@@ -32,35 +40,30 @@ export class App implements OnInit {
 
   winningCells: number[] = [];
 
+  // GAME MODE
+  // 0 = Player vs Player
+  // 1 = Player vs Computer
+  selectedMode = 0;
+
+  // SCOREBOARD
   xWins = 0;
-
   oWins = 0;
-
   draws = 0;
 
+  // MOVE HISTORY
   moves: Move[] = [];
 
+  // GAME
   gameId: string | null = null;
 
   gameReady = false;
 
   moveInProgress = false;
 
-  private history: (string | null)[][] = [];
-
-
-  // ==========================================
-  // INIT
-  // ==========================================
-
   ngOnInit(): void {
     this.createGame();
+    this.loadScoreboard();
   }
-
-
-  // ==========================================
-  // CREATE GAME
-  // ==========================================
 
   createGame(): void {
 
@@ -69,25 +72,36 @@ export class App implements OnInit {
     this.moveInProgress = false;
     this.errorMessage = '';
 
-    this.gameService.createGame(0).subscribe({
+    this.gameService.createGame(
+      this.selectedMode
+    ).subscribe({
 
       next: (game) => {
 
-        console.log('Game created:', game);
+        console.log(
+          'Game created:',
+          game
+        );
 
         this.updateGameFromApi(game);
 
-        this.gameReady = true;
+        console.log(
+          'Game ID:',
+          this.gameId
+        );
 
-        this.cdr.detectChanges();
-
-        console.log('Game ID:', this.gameId);
-        console.log('Game Ready:', this.gameReady);
+        console.log(
+          'Game Ready:',
+          this.gameReady
+        );
       },
 
       error: (error) => {
 
-        console.error('Failed to create game:', error);
+        console.error(
+          'Failed to create game:',
+          error
+        );
 
         this.gameReady = false;
 
@@ -98,14 +112,23 @@ export class App implements OnInit {
 
         this.cdr.detectChanges();
       }
-
     });
   }
 
+  changeGameMode(): void {
 
-  // ==========================================
-  // MAKE MOVE
-  // ==========================================
+    if (this.moveInProgress) {
+      return;
+    }
+
+    console.log(
+      'Changing game mode to:',
+      this.selectedMode
+    );
+
+    // Changing mode starts a fresh game.
+    this.createGame();
+  }
 
   makeMove(index: number): void {
 
@@ -120,32 +143,48 @@ export class App implements OnInit {
       this.moveInProgress
     );
 
-
     if (
       !this.gameReady ||
       !this.gameId ||
       this.moveInProgress
     ) {
-
       console.log('MOVE BLOCKED');
+      return;
+    }
+
+    // In computer mode, the human controls only X.
+    if (
+      this.selectedMode === 1 &&
+      this.currentPlayer !== 'X'
+    ) {
+      console.log(
+        'MOVE BLOCKED - Computer turn'
+      );
 
       return;
     }
 
+    // Do not allow an occupied cell.
+    if (this.board[index] !== null) {
 
-    const row = Math.floor(index / 3);
+      console.log(
+        'MOVE BLOCKED - Cell occupied'
+      );
 
-    const column = index % 3;
+      return;
+    }
 
+    const row =
+      Math.floor(index / 3);
+
+    const column =
+      index % 3;
 
     this.errorMessage = '';
 
     this.moveInProgress = true;
 
-
-    // Immediately refresh UI
     this.cdr.detectChanges();
-
 
     console.log(
       'Calling API:',
@@ -156,7 +195,6 @@ export class App implements OnInit {
       column
     );
 
-
     this.gameService.makeMove(
       this.gameId,
       row,
@@ -165,56 +203,43 @@ export class App implements OnInit {
 
       next: (game) => {
 
-        console.log('MOVE RESPONSE:', game);
+        console.log(
+          'MOVE RESPONSE:',
+          game
+        );
 
-
-        // Update board from backend
+        /*
+         * In computer mode the backend response already
+         * contains both the human X move and the
+         * computer O move.
+         */
         this.updateGameFromApi(game);
-
 
         this.moveInProgress = false;
 
+        this.loadScoreboard();
 
-        // Force Angular UI refresh
         this.cdr.detectChanges();
-
-
-        console.log(
-          'Board after move:',
-          this.board
-        );
-
-        console.log(
-          'Current player:',
-          this.currentPlayer
-        );
       },
-
 
       error: (error) => {
 
-        console.error('Move failed:', error);
-
+        console.error(
+          'Move failed:',
+          error
+        );
 
         this.errorMessage =
           error?.error?.message ||
           error?.error ||
           'Unable to make the move.';
 
-
         this.moveInProgress = false;
-
 
         this.cdr.detectChanges();
       }
-
     });
   }
-
-
-  // ==========================================
-  // RESET GAME
-  // ==========================================
 
   resetGame(): void {
 
@@ -225,14 +250,9 @@ export class App implements OnInit {
       return;
     }
 
-
     this.moveInProgress = true;
 
     this.errorMessage = '';
-
-
-    this.cdr.detectChanges();
-
 
     this.gameService.resetGame(
       this.gameId
@@ -245,19 +265,14 @@ export class App implements OnInit {
           game
         );
 
-
         this.updateGameFromApi(game);
-
-        this.history = [];
 
         this.errorMessage = '';
 
         this.moveInProgress = false;
 
-
         this.cdr.detectChanges();
       },
-
 
       error: (error) => {
 
@@ -266,26 +281,17 @@ export class App implements OnInit {
           error
         );
 
-
         this.errorMessage =
           error?.error?.message ||
           error?.error ||
           'Unable to reset the game.';
 
-
         this.moveInProgress = false;
-
 
         this.cdr.detectChanges();
       }
-
     });
   }
-
-
-  // ==========================================
-  // UNDO MOVE
-  // ==========================================
 
   undoMove(): void {
 
@@ -296,14 +302,9 @@ export class App implements OnInit {
       return;
     }
 
-
     this.errorMessage = '';
 
     this.moveInProgress = true;
-
-
-    this.cdr.detectChanges();
-
 
     this.gameService.undoGame(
       this.gameId
@@ -316,15 +317,12 @@ export class App implements OnInit {
           game
         );
 
-
         this.updateGameFromApi(game);
 
         this.moveInProgress = false;
 
-
         this.cdr.detectChanges();
       },
-
 
       error: (error) => {
 
@@ -333,26 +331,106 @@ export class App implements OnInit {
           error
         );
 
-
         this.errorMessage =
           error?.error?.message ||
           error?.error ||
           'Unable to undo the move.';
 
-
         this.moveInProgress = false;
-
 
         this.cdr.detectChanges();
       }
-
     });
   }
 
+  loadScoreboard(): void {
 
-  // ==========================================
-  // UPDATE UI FROM API
-  // ==========================================
+    this.gameService.getScoreboard().subscribe({
+
+      next: (
+        scoreboard: ScoreboardResponse
+      ) => {
+
+        console.log(
+          'Scoreboard:',
+          scoreboard
+        );
+
+        this.xWins =
+          scoreboard.xWins;
+
+        this.oWins =
+          scoreboard.oWins;
+
+        this.draws =
+          scoreboard.draws;
+
+        this.cdr.detectChanges();
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Failed to load scoreboard:',
+          error
+        );
+      }
+    });
+  }
+
+  resetScoreboard(): void {
+
+    if (this.moveInProgress) {
+      return;
+    }
+
+    this.errorMessage = '';
+
+    this.moveInProgress = true;
+
+    this.gameService.resetScoreboard().subscribe({
+
+      next: (
+        scoreboard: ScoreboardResponse
+      ) => {
+
+        console.log(
+          'Scoreboard reset:',
+          scoreboard
+        );
+
+        this.xWins =
+          scoreboard.xWins;
+
+        this.oWins =
+          scoreboard.oWins;
+
+        this.draws =
+          scoreboard.draws;
+
+        this.moveInProgress = false;
+
+        this.cdr.detectChanges();
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Reset scoreboard failed:',
+          error
+        );
+
+        this.errorMessage =
+          error?.error?.message ||
+          error?.error ||
+          'Unable to reset scoreboard.';
+
+        this.moveInProgress = false;
+
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   private updateGameFromApi(
     game: GameResponse
@@ -363,39 +441,34 @@ export class App implements OnInit {
       game
     );
 
+    this.gameId =
+      game.id;
 
-    // Game ID
-    this.gameId = game.id;
+    this.selectedMode =
+      game.mode;
 
+    this.board =
+      game.board.map(
+        cell => {
 
-    // Board
-    this.board = game.board.map(
-      cell => {
+          if (cell === null) {
+            return null;
+          }
 
-        if (cell === null) {
-          return null;
+          return cell === 0
+            ? 'X'
+            : 'O';
         }
+      );
 
-        return cell === 0
-          ? 'X'
-          : 'O';
-      }
-    );
-
-
-    // Current player
     this.currentPlayer =
       game.currentPlayer === 0
         ? 'X'
         : 'O';
 
-
-    // Winning cells
     this.winningCells =
       game.winningCells ?? [];
 
-
-    // Winner
     this.winner =
       game.winner === null
         ? null
@@ -403,23 +476,17 @@ export class App implements OnInit {
           ? 'X'
           : 'O';
 
-
-    // Status
     this.status =
       game.status === 0
         ? 'In Progress'
-        : game.status === 1
+        : game.status === 1 ||
+          game.status === 2
           ? 'Won'
           : 'Draw';
 
-
-    // Move history
     this.moves =
       game.moves ?? [];
 
-
-    // Game is ready
     this.gameReady = true;
   }
-
 }

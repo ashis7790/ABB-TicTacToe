@@ -71,6 +71,7 @@ public class GameService : IGameService
             throw new InvalidOperationException(
                 "There is no move available to undo.");
         }
+        
 
         if (game.Mode == GameMode.PlayerVsPlayer)
         {
